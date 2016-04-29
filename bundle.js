@@ -20138,12 +20138,18 @@
 
 	var React = __webpack_require__(1);
 	var Clock = __webpack_require__(168);
+	var Weather = __webpack_require__(171);
 	
 	module.exports = React.createClass({
 	  displayName: 'exports',
 	
 	  render: function () {
-	    return React.createElement(Clock, null);
+	    return React.createElement(
+	      'div',
+	      null,
+	      React.createElement(Clock, null),
+	      React.createElement(Weather, null)
+	    );
 	  }
 	});
 
@@ -20208,6 +20214,79 @@
 	  }
 	
 	});
+
+/***/ },
+/* 171 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var React = __webpack_require__(1);
+	
+	function toQueryString(obj) {
+	  var parts = [];
+	  for (var i in obj) {
+	    if (obj.hasOwnProperty(i)) {
+	      parts.push(encodeURIComponent(i) + "=" + encodeURIComponent(obj[i]));
+	    }
+	  }
+	  return parts.join("&");
+	}
+	
+	var Weather = React.createClass({
+	  displayName: "Weather",
+	
+	  getInitialState: function () {
+	    return { weather: null };
+	  },
+	
+	  componentDidMount: function () {
+	    navigator.geolocation.getCurrentPosition(this.pollWeather);
+	  },
+	
+	  pollWeather: function (location) {
+	    var lat = location.coords.latitude;
+	    var long = location.coords.longitude;
+	    var url = "http://api.openweathermap.org/data/2.5/weather?";
+	    var params = {
+	      lat: location.coords.latitude,
+	      lon: location.coords.longitude
+	    };
+	    url += toQueryString(params);
+	    url += "&645c5d39c7603f17e23fcaffcea1a3c1";
+	
+	    var xmlhttp = new XMLHttpRequest();
+	    var that = this;
+	    xmlhttp.onreadystatechange = function () {
+	      //ready state of means this is complete
+	      if (xmlhttp.status === 200 && xmlhttp.readyState === XMLHttpRequest.DONE) {
+	        var data = JSON.parse(xmlhttp.responseText);
+	        that.setState({ weather: data });
+	      }
+	    };
+	
+	    xmlhttp.open("GET", url, true);
+	    xmlhttp.send();
+	  },
+	
+	  render: function () {
+	    var content = "";
+	
+	    if (this.state.weather) {
+	      var weather = this.state.weather;
+	      var temp = (weather.main.temp - 273.15) * 1.8 + 32;
+	      content += weather.name + "\n";
+	      content += temp.toFixed(1) + " degrees";
+	    } else {
+	      content = "loading weather...";
+	    }
+	    return React.createElement(
+	      "div",
+	      { className: "weather" },
+	      content
+	    );
+	  }
+	});
+	
+	module.exports = Weather;
 
 /***/ }
 /******/ ]);
